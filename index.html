@@ -8,8 +8,22 @@
         * { box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; background: #121212; color: #ffffff; max-width: 500px; margin: auto; }
         
-        .header-title { text-align: center; color: #4dabf7; margin-top: 10px; margin-bottom: 4px; font-size: 26px; font-weight: bold; }
-        .header-subtitle { text-align: center; color: #888888; margin-bottom: 20px; font-size: 16px; font-weight: normal; }
+        .header-title { text-align: center; color: #4dabf7; margin-top: 10px; margin-bottom: 8px; font-size: 26px; font-weight: bold; }
+        
+        .btn-prowadnica { 
+            display: block; 
+            margin: 0 auto 20px auto; 
+            padding: 8px 16px; 
+            background: #2a2a2a; 
+            color: #ffd43b; 
+            border: 1px solid #ffd43b; 
+            border-radius: 20px; 
+            font-size: 15px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.2s;
+        }
+        .btn-prowadnica:active { background: #333; transform: scale(0.98); }
 
         .card { background: #1e1e1e; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #333; }
         .card-header { font-size: 16px; font-weight: bold; color: #4dabf7; margin-bottom: 12px; }
@@ -41,7 +55,7 @@
 <body>
 
     <div class="header-title">MB 2 + 1</div>
-    <div class="header-subtitle">prowadnica 50</div>
+    <button id="btn-prowadnica" class="btn-prowadnica" onclick="przelaczProwadnice()">Prowadnica: 50 cm</button>
 
     <!-- Wprowadzanie szafek -->
     <div class="card">
@@ -62,6 +76,23 @@
 
     <script>
         let wierszId = 0;
+        let dlugoscProwadnicy = 50;
+
+        function przelaczProwadnice() {
+            if (dlugoscProwadnicy === 50) {
+                dlugoscProwadnicy = 45;
+            } else {
+                dlugoscProwadnicy = 50;
+            }
+            
+            const btn = document.getElementById('btn-prowadnica');
+            btn.innerText = `Prowadnica: ${dlugoscProwadnicy} cm`;
+
+            // Jeśli wyniki są widoczne, przelicz je automatycznie po zmianie prowadnicy
+            if (document.getElementById('wyniki').style.display === 'block') {
+                generujWymiary();
+            }
+        }
 
         function dodajWierszSzafki(szer = '', szt = 1) {
             wierszId++;
@@ -92,6 +123,9 @@
             const wiersze = document.querySelectorAll('.szafka-row');
             let mapaFormatek = {};
 
+            // Długość dna zależna od wybranej prowadnicy
+            const dlugoscDna = dlugoscProwadnicy === 45 ? 445 : 495;
+
             wiersze.forEach(row => {
                 const S = parseFloat(row.querySelector('.val-szer').value) || 0;
                 const n = parseInt(row.querySelector('.val-szt').value) || 0;
@@ -101,7 +135,7 @@
                     let tyl_dl = S - 132;
 
                     let wymiary = [
-                        { dim: `495 × ${dno_szer}`, qty: 3 * n },
+                        { dim: `${dlugoscDna} × ${dno_szer}`, qty: 3 * n },
                         { dim: `${tyl_dl} × 69`, qty: 1 * n },
                         { dim: `${tyl_dl} × 180`, qty: 2 * n }
                     ];
