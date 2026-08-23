@@ -11,28 +11,30 @@
         .header-title { text-align: center; color: #4dabf7; margin-top: 10px; margin-bottom: 4px; font-size: 26px; font-weight: bold; }
         .header-subtitle { text-align: center; color: #888888; margin-bottom: 20px; font-size: 16px; font-weight: normal; }
 
-        .card { background: #1e1e1e; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #333; position: relative; }
-        .card-summary { background: #182533; border-color: #2b4257; }
-        
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .card-title { font-weight: bold; font-size: 16px; color: #4dabf7; }
-        .btn-remove { background: #ff4d4d; color: white; border: none; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #333; }
+        .card-header { font-size: 16px; font-weight: bold; color: #4dabf7; margin-bottom: 12px; }
 
-        label { font-size: 14px; color: #aaa; display: block; margin-bottom: 6px; }
-        .input-group { display: flex; gap: 10px; margin-bottom: 12px; }
-        .input-field { flex: 1; }
-        
+        .szafka-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+        .szafka-row input { margin-bottom: 0; }
+        .input-szer { flex: 2; }
+        .input-szt { flex: 1; }
+
+        label { font-size: 13px; color: #aaa; display: block; margin-bottom: 4px; }
         input { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; border-radius: 8px; font-size: 18px; color: #fff; font-weight: bold; text-align: center; }
         input:focus { border-color: #4dabf7; outline: none; }
-        
+
+        .btn-del { background: #ff4d4d; color: white; border: none; width: 42px; height: 46px; border-radius: 8px; font-weight: bold; font-size: 18px; cursor: pointer; flex-shrink: 0; }
+        .btn-add { display: block; width: 100%; padding: 12px; background: #2a2a2a; color: #4dabf7; border: 1px dashed #4dabf7; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-calc { display: block; width: 100%; padding: 16px; background: #2b8a3e; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(43, 138, 62, 0.4); }
+        .btn-calc:active { background: #237032; }
+
         .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #2a2a2a; }
         .row:last-child { border-bottom: none; }
         .item-title { font-weight: bold; font-size: 15px; color: #fff; }
         .item-dims { font-size: 16px; color: #4dabf7; font-weight: bold; font-family: monospace; }
-        .item-qty { background: #ff6b6b; color: white; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 14px; }
+        .item-qty { background: #ff6b6b; color: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 14px; }
         
-        .btn-add { display: block; width: 100%; padding: 14px; background: #2b8a3e; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 20px; text-align: center; }
-        .btn-add:active { background: #237032; }
+        #wyniki { display: none; }
     </style>
 </head>
 <body>
@@ -40,136 +42,123 @@
     <div class="header-title">MB 2 + 1</div>
     <div class="header-subtitle">prowadnica 50</div>
 
-    <!-- Pojemnik na szafki -->
-    <div id="szafki-list"></div>
+    <!-- Wprowadzanie szafek -->
+    <div class="card">
+        <div class="card-header">Lista szafek</div>
+        <div id="lista-szafek"></div>
+        <button class="btn-add" onclick="dodajWierszSzafki()">+ Dodaj kolejną szafkę</button>
+    </div>
 
-    <button class="btn-add" onclick="dodajSzafke()">+ Dodaj kolejną szafkę</button>
+    <button class="btn-calc" onclick="generujWymiary()">OBLICZ FORMATKI</button>
 
-    <!-- Podsumowanie łącznej ilości formatek -->
-    <div class="card card-summary">
-        <div class="card-title" style="color: #69db7c; margin-bottom: 12px;">Podsumowanie łączne</div>
-        <div class="row">
-            <div class="item-title">Suma dni szuflad</div>
-            <span class="item-qty" style="background: #2f9e44;" id="total_dno">0 szt.</span>
-        </div>
-        <div class="row">
-            <div class="item-title">Suma tyłów niskich</div>
-            <span class="item-qty" style="background: #2f9e44;" id="total_niskie">0 szt.</span>
-        </div>
-        <div class="row">
-            <div class="item-title">Suma tyłów wysokich</div>
-            <span class="item-qty" style="background: #2f9e44;" id="total_wysokie">0 szt.</span>
+    <!-- Wyniki -->
+    <div id="wyniki">
+        <div class="card">
+            <div class="card-header" style="color: #69db7c;">Podsumowanie formatek</div>
+            <div id="kontener-formatek"></div>
         </div>
     </div>
 
     <script>
-        let szafkaId = 0;
+        let wierszId = 0;
 
-        function dodajSzafke(szerokosc = 600, ilosc = 1) {
-            szafkaId++;
-            const id = szafkaId;
-            const container = document.getElementById('szafki-list');
-
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.id = `szafka-${id}`;
-            card.innerHTML = `
-                <div class="card-header">
-                    <div class="card-title">Szafka #${id}</div>
-                    ${id > 1 ? `<button class="btn-remove" onclick="usunSzafke(${id})">Usuń</button>` : ''}
+        function dodajWierszSzafki(szer = 600, szt = 1) {
+            wierszId++;
+            const container = document.getElementById('lista-szafek');
+            const div = document.createElement('div');
+            div.className = 'szafka-row';
+            div.id = `row-${wierszId}`;
+            div.innerHTML = `
+                <div class="input-szer">
+                    <label>Szerokość (mm)</label>
+                    <input type="number" class="val-szer" value="${szer}">
                 </div>
-                <div class="input-group">
-                    <div class="input-field">
-                        <label>Szerokość (mm):</label>
-                        <input type="number" id="szer-${id}" value="${szerokosc}" oninput="obliczWszystko()">
-                    </div>
-                    <div class="input-field">
-                        <label>Liczba (szt.):</label>
-                        <input type="number" id="ilosc-${id}" value="${ilosc}" oninput="obliczWszystko()">
-                    </div>
+                <div class="input-szt">
+                    <label>Liczba (szt.)</label>
+                    <input type="number" class="val-szt" value="${szt}">
                 </div>
-                <div class="row">
-                    <div>
-                        <div class="item-title">Dno szuflady</div>
-                        <div class="item-dims" id="dno-${id}">-</div>
-                    </div>
-                    <span class="item-qty" id="s_dno-${id}">0 szt.</span>
-                </div>
-                <div class="row">
-                    <div>
-                        <div class="item-title">Tył szuflady niski</div>
-                        <div class="item-dims" id="tyl_niski-${id}">-</div>
-                    </div>
-                    <span class="item-qty" id="s_niski-${id}">0 szt.</span>
-                </div>
-                <div class="row">
-                    <div>
-                        <div class="item-title">Tył szuflady wysoki</div>
-                        <div class="item-dims" id="tyl_wysoki-${id}">-</div>
-                    </div>
-                    <span class="item-qty" id="s_wysoki-${id}">0 szt.</span>
-                </div>
+                ${wierszId > 1 ? `<button class="btn-del" onclick="usunWiersz(${wierszId})">×</button>` : '<div style="width:42px;"></div>'}
             `;
-            container.appendChild(card);
-            obliczWszystko();
+            container.appendChild(div);
         }
 
-        function usunSzafke(id) {
-            const card = document.getElementById(`szafka-${id}`);
-            if (card) {
-                card.remove();
-                obliczWszystko();
-            }
+        function usunWiersz(id) {
+            const el = document.getElementById(`row-${id}`);
+            if (el) el.remove();
         }
 
-        function obliczWszystko() {
-            let totalDno = 0;
-            let totalNiski = 0;
-            let totalWysoki = 0;
+        function generujWymiary() {
+            const wiersze = document.querySelectorAll('.szafka-row');
+            let dnoMapa = {};
+            let tylNiskiMapa = {};
+            let tylWysokiMapa = {};
 
-            const cards = document.querySelectorAll('#szafki-list .card');
-            
-            cards.forEach(card => {
-                const id = card.id.replace('szafka-', '');
-                const S = parseFloat(document.getElementById(`szer-${id}`).value) || 0;
-                const n = parseInt(document.getElementById(`ilosc-${id}`).value) || 0;
+            wiersze.forEach(row => {
+                const S = parseFloat(row.querySelector('.val-szer').value) || 0;
+                const n = parseInt(row.querySelector('.val-szt').value) || 0;
 
                 if (S > 0 && n > 0) {
                     let dno_szer = S - 122;
                     let tyl_dl = S - 132;
 
-                    let dnoSzt = 3 * n;
-                    let niskiSzt = 1 * n;
-                    let wysokiSzt = 2 * n;
+                    let dnoWymiar = `495 × ${dno_szer} mm`;
+                    let niskiWymiar = `${tyl_dl} × 69 mm`;
+                    let wysokiWymiar = `${tyl_dl} × 180 mm`;
 
-                    document.getElementById(`dno-${id}`).innerText = "495 × " + dno_szer + " mm";
-                    document.getElementById(`tyl_niski-${id}`).innerText = tyl_dl + " × 69 mm";
-                    document.getElementById(`tyl_wysoki-${id}`).innerText = tyl_dl + " × 180 mm";
-
-                    document.getElementById(`s_dno-${id}`).innerText = dnoSzt + " szt.";
-                    document.getElementById(`s_niski-${id}`).innerText = niskiSzt + " szt.";
-                    document.getElementById(`s_wysoki-${id}`).innerText = wysokiSzt + " szt.";
-
-                    totalDno += dnoSzt;
-                    totalNiski += niskiSzt;
-                    totalWysoki += wysokiSzt;
-                } else {
-                    document.getElementById(`dno-${id}`).innerText = "-";
-                    document.getElementById(`tyl_niski-${id}`).innerText = "-";
-                    document.getElementById(`tyl_wysoki-${id}`).innerText = "-";
-                    document.getElementById(`s_dno-${id}`).innerText = "0 szt.";
-                    document.getElementById(`s_niski-${id}`).innerText = "0 szt.";
-                    document.getElementById(`s_wysoki-${id}`).innerText = "0 szt.";
+                    dnoMapa[dnoWymiar] = (dnoMapa[dnoWymiar] || 0) + (3 * n);
+                    tylNiskiMapa[niskiWymiar] = (tylNiskiMapa[niskiWymiar] || 0) + (1 * n);
+                    tylWysokiMapa[wysokiWymiar] = (tylWysokiMapa[wysokiWymiar] || 0) + (2 * n);
                 }
             });
 
-            document.getElementById('total_dno').innerText = totalDno + " szt.";
-            document.getElementById('total_niskie').innerText = totalNiski + " szt.";
-            document.getElementById('total_wysokie').innerText = totalWysoki + " szt.";
+            const kontener = document.getElementById('kontener-formatek');
+            kontener.innerHTML = '';
+
+            // Generowanie HTML wyników
+            let html = '';
+
+            html += `<div style="font-weight:bold; color:#aaa; margin-top:10px; margin-bottom:6px; font-size:13px;">Dna szuflad:</div>`;
+            for (let dim in dnoMapa) {
+                html += `
+                    <div class="row">
+                        <div>
+                            <div class="item-title">Dno szuflady</div>
+                            <div class="item-dims">${dim}</div>
+                        </div>
+                        <span class="item-qty">${dnoMapa[dim]} szt.</span>
+                    </div>`;
+            }
+
+            html += `<div style="font-weight:bold; color:#aaa; margin-top:16px; margin-bottom:6px; font-size:13px;">Tyły niskie:</div>`;
+            for (let dim in tylNiskiMapa) {
+                html += `
+                    <div class="row">
+                        <div>
+                            <div class="item-title">Tył niski</div>
+                            <div class="item-dims">${dim}</div>
+                        </div>
+                        <span class="item-qty">${tylNiskiMapa[dim]} szt.</span>
+                    </div>`;
+            }
+
+            html += `<div style="font-weight:bold; color:#aaa; margin-top:16px; margin-bottom:6px; font-size:13px;">Tyły wysokie:</div>`;
+            for (let dim in tylWysokiMapa) {
+                html += `
+                    <div class="row">
+                        <div>
+                            <div class="item-title">Tył wysoki</div>
+                            <div class="item-dims">${dim}</div>
+                        </div>
+                        <span class="item-qty">${tylWysokiMapa[dim]} szt.</span>
+                    </div>`;
+            }
+
+            kontener.innerHTML = html;
+            document.getElementById('wyniki').style.display = 'block';
         }
 
-        // Dodaj pierwszą szafkę na start
-        dodajSzafke(600, 1);
+        // Pierwsza szafka na start
+        dodajWierszSzafki(600, 1);
     </script>
 </body>
 </html>
