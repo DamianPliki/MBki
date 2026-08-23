@@ -72,11 +72,11 @@
             div.innerHTML = `
                 <div class="input-szer">
                     <label>Szerokość (mm)</label>
-                    <input type="number" class="val-szer" value="${szer}" placeholder="mm">
+                    <input type="number" class="val-szer" value="${szer}" placeholder="mm" autocomplete="off">
                 </div>
                 <div class="input-szt">
                     <label>Liczba (szt.)</label>
-                    <input type="number" class="val-szt" value="${szt}" placeholder="szt.">
+                    <input type="number" class="val-szt" value="${szt}" placeholder="szt." autocomplete="off">
                 </div>
                 ${wierszId > 1 ? `<button class="btn-del" onclick="usunWiersz(${wierszId})">×</button>` : '<div style="width:42px;"></div>'}
             `;
@@ -136,7 +136,7 @@
             document.getElementById('wyniki').style.display = 'block';
         }
 
-        // Pierwszy wiersz startowy z pustym polem szerokości
+        // Pierwszy wiersz startowy bez wpisanej wartości
         dodajWierszSzafki('', 1);
     </script>
 </body>
