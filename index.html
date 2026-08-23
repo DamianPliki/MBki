@@ -63,7 +63,7 @@
     <script>
         let wierszId = 0;
 
-        function dodajWierszSzafki(szer = '', szt = 1) {
+        function dodajWierszSzafki(szer = '', szt = '') {
             wierszId++;
             const container = document.getElementById('lista-szafek');
             const div = document.createElement('div');
@@ -94,7 +94,9 @@
 
             wiersze.forEach(row => {
                 const S = parseFloat(row.querySelector('.val-szer').value) || 0;
-                const n = parseInt(row.querySelector('.val-szt').value) || 0;
+                // Jeśli pole sztuk jest puste, automatycznie traktujemy je jako 1 sztukę
+                let inputSztVal = row.querySelector('.val-szt').value.trim();
+                const n = inputSztVal === '' ? 1 : (parseInt(inputSztVal) || 0);
 
                 if (S > 0 && n > 0) {
                     let dno_szer = S - 122;
@@ -136,8 +138,8 @@
             document.getElementById('wyniki').style.display = 'block';
         }
 
-        // Pierwszy wiersz startowy bez wpisanej wartości
-        dodajWierszSzafki('', 1);
+        // Pierwszy wiersz startowy z pustymi polami
+        dodajWierszSzafki('', '');
     </script>
 </body>
 </html>
