@@ -13,12 +13,12 @@
         .btn-prowadnica { 
             display: block; 
             margin: 0 auto 20px auto; 
-            padding: 8px 16px; 
+            padding: 10px 20px; 
             background: #2a2a2a; 
             color: #ffd43b; 
             border: 1px solid #ffd43b; 
             border-radius: 20px; 
-            font-size: 15px; 
+            font-size: 16px; 
             font-weight: bold; 
             cursor: pointer; 
             transition: all 0.2s;
@@ -55,7 +55,7 @@
 <body>
 
     <div class="header-title">MB 2 + 1</div>
-    <button id="btn-prowadnica" class="btn-prowadnica" onclick="przelaczProwadnice()">Prowadnica: 50 cm</button>
+    <button id="btn-prowadnica" class="btn-prowadnica" onclick="przelaczProwadnice()">Prowadnica: 500 mm</button>
 
     <!-- Wprowadzanie szafek -->
     <div class="card">
@@ -76,17 +76,18 @@
 
     <script>
         let wierszId = 0;
-        let dlugoscProwadnicy = 50;
+        
+        // Tablica dostępnych długości prowadnic (mm)
+        const opcjeProwadnic = [500, 450, 400, 350, 300];
+        let indeksProwadnicy = 0;
 
         function przelaczProwadnice() {
-            if (dlugoscProwadnicy === 50) {
-                dlugoscProwadnicy = 45;
-            } else {
-                dlugoscProwadnicy = 50;
-            }
+            // Przełącz na kolejną długość z tablicy
+            indeksProwadnicy = (indeksProwadnicy + 1) % opcjeProwadnic.length;
+            const aktualnaProwadnica = opcjeProwadnic[indeksProwadnicy];
             
             const btn = document.getElementById('btn-prowadnica');
-            btn.innerText = `Prowadnica: ${dlugoscProwadnicy} cm`;
+            btn.innerText = `Prowadnica: ${aktualnaProwadnica} mm`;
 
             // Jeśli wyniki są widoczne, przelicz je automatycznie po zmianie prowadnicy
             if (document.getElementById('wyniki').style.display === 'block') {
@@ -123,8 +124,9 @@
             const wiersze = document.querySelectorAll('.szafka-row');
             let mapaFormatek = {};
 
-            // Długość dna zależna od wybranej prowadnicy
-            const dlugoscDna = dlugoscProwadnicy === 45 ? 445 : 495;
+            // Wyliczenie długości dna: prowadnica - 5 mm (np. 500 -> 495, 450 -> 445, itd.)
+            const dlugoscProwadnicy = opcjeProwadnic[indeksProwadnicy];
+            const dlugoscDna = dlugoscProwadnicy - 5;
 
             wiersze.forEach(row => {
                 const S = parseFloat(row.querySelector('.val-szer').value) || 0;
