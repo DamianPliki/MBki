@@ -63,7 +63,7 @@
     <script>
         let wierszId = 0;
 
-        function dodajWierszSzafki(szer = '', szt = '') {
+        function dodajWierszSzafki(szer = '', szt = 1) {
             wierszId++;
             const container = document.getElementById('lista-szafek');
             const div = document.createElement('div');
@@ -72,11 +72,11 @@
             div.innerHTML = `
                 <div class="input-szer">
                     <label>Szerokość (mm)</label>
-                    <input type="number" class="val-szer" value="${szer}" placeholder="mm" autocomplete="off">
+                    <input type="number" class="val-szer" value="${szer}" placeholder="mm" autocomplete="off" onfocus="this.select()">
                 </div>
                 <div class="input-szt">
                     <label>Liczba (szt.)</label>
-                    <input type="number" class="val-szt" value="${szt}" placeholder="szt." autocomplete="off">
+                    <input type="number" class="val-szt" value="${szt}" placeholder="szt." autocomplete="off" onfocus="this.select()">
                 </div>
                 ${wierszId > 1 ? `<button class="btn-del" onclick="usunWiersz(${wierszId})">×</button>` : '<div style="width:42px;"></div>'}
             `;
@@ -94,9 +94,7 @@
 
             wiersze.forEach(row => {
                 const S = parseFloat(row.querySelector('.val-szer').value) || 0;
-                // Jeśli pole sztuk jest puste, automatycznie traktujemy je jako 1 sztukę
-                let inputSztVal = row.querySelector('.val-szt').value.trim();
-                const n = inputSztVal === '' ? 1 : (parseInt(inputSztVal) || 0);
+                const n = parseInt(row.querySelector('.val-szt').value) || 0;
 
                 if (S > 0 && n > 0) {
                     let dno_szer = S - 122;
@@ -138,8 +136,8 @@
             document.getElementById('wyniki').style.display = 'block';
         }
 
-        // Pierwszy wiersz startowy z pustymi polami
-        dodajWierszSzafki('', '');
+        // Pierwszy wiersz startowy
+        dodajWierszSzafki('', 1);
     </script>
 </body>
 </html>
